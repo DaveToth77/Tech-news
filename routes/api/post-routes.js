@@ -3,13 +3,13 @@ const sequelize = require('../../config/connection');
 const {
     Post,
     User,
+    Comment,
     Vote
 } = require('../../models');
 
-
-//get all users
+// get all users
 router.get('/', (req, res) => {
-    console.log('=============================');
+    console.log('======================');
     Post.findAll({
             attributes: [
                 'id',
@@ -22,17 +22,25 @@ router.get('/', (req, res) => {
                 ['created_at', 'DESC']
             ],
             include: [{
-                model: User,
-                attributes: ['username']
-            }]
+                    model: Comment,
+                    attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+                    include: {
+                        model: User,
+                        attributes: ['username']
+                    }
+                },
+                {
+                    model: User,
+                    attributes: ['username']
+                }
+            ]
         })
-
         .then(dbPostData => res.json(dbPostData))
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
-        })
-})
+        });
+});
 
 router.get('/:id', (req, res) => {
     Post.findOne({
@@ -47,9 +55,18 @@ router.get('/:id', (req, res) => {
                 [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
             ],
             include: [{
-                model: User,
-                attributes: ['username']
-            }]
+                    model: Comment,
+                    attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+                    include: {
+                        model: User,
+                        attributes: ['username']
+                    }
+                },
+                {
+                    model: User,
+                    attributes: ['username']
+                }
+            ]
         })
         .then(dbPostData => {
             if (!dbPostData) {
@@ -63,8 +80,8 @@ router.get('/:id', (req, res) => {
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
-        })
-})
+        });
+});
 
 router.post('/', (req, res) => {
     // expects {title: 'Taskmaster goes public!', post_url: 'https://taskmaster.com/press', user_id: 1}
@@ -80,17 +97,19 @@ router.post('/', (req, res) => {
         });
 });
 
-// create the vote
-// PUT /api/posts/upvote
 router.put('/upvote', (req, res) => {
     // custom static method created in models/Post.js
-    Post.upvote(req.body, { Vote })
-      .then(updatedPostData => res.json(updatedPostData))
-      .catch(err => {
-        console.log(err);
-        res.status(400).json(err);
-      });
-  });
+    Post.upvote(req.body, {
+            Vote,
+            Comment,
+            User
+        })
+        .then(updatedVoteData => res.json(updatedVoteData))
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
 
 router.put('/:id', (req, res) => {
     Post.update({
