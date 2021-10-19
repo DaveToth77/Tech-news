@@ -4,9 +4,11 @@
   "description": "Tech News",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js",
+    "seeds": "node seeds/index.js",
     "dev": "nodemon server.js"
+
   },
   "repository": {
     "type": "git",
@@ -19,14 +21,16 @@
     "url": "https://github.com/DaveToth77/Tech-news/issues"
   },
   "homepage": "https://github.com/DaveToth77/Tech-news#readme",
-  "devDependencies": {
-    "nodemon": "^2.0.13"
-  },
   "dependencies": {
     "bcrypt": "^5.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-handlebars": "^5.3.4",
     "mysql2": "^2.3.0",
     "sequelize": "^6.7.0"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0",
+    "nodemon": "^2.0.13"
   }
 }
